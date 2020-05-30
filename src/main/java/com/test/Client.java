@@ -21,7 +21,7 @@ public class Client {
             Employee employee = entry.getKey();
             PayContext context = new PayContext(employee);
             int month = entry.getValue();
-            System.out.println("员工"+employee.name+",月份"+month+"的工资为："+context.getSalary());
+            System.out.println("员工"+employee.name+",月份"+month+"的工资为："+context.getSalary(month));
         }
 
     }

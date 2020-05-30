@@ -6,7 +6,7 @@ package com.test.strategy;
  * @version: 1.0
  * 具体的策略工厂：即生成具体的员工的工厂类,因为要初始化birthday,所以舍弃
  */
-public class StrategyFactory {
+public class EmployeeFactory {
     public static Employee getEmployee(EmployeeType employeeType){
         Employee employee = null;
         try {

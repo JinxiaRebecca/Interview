@@ -13,6 +13,9 @@ import java.util.Date;
  * 固定工资的员工
  */
 public class Salary extends Employee {
+    public Salary() {
+    }
+
     public Salary(String name, Date birthday) {
         super(name, birthday);
     }
@@ -22,11 +25,13 @@ public class Salary extends Employee {
     }
 
     @Override
-    public double getSalary() {
+    public double getSalary(int month) {
         String path ="basicSalary";
         String key = "work.basic";
         //从配置文件读取员工的固定工资
+        double birBonus = getBirBonus(month);
         double basicSal = PropertiesParseUtil.getBasicSalary(path,key);
-        return DoubleUtil.add(basicSal,salary);
+        salary = DoubleUtil.add(basicSal,birBonus);
+        return salary;
     }
 }

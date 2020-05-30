@@ -11,7 +11,7 @@ public class PayContext {
         this.employee=employee;
     }
 
-    public double getSalary(){
-        return this.employee.getSalary();
+    public double getSalary(int month){
+        return this.employee.getSalary(month);
     }
 }

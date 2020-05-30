@@ -1,15 +1,15 @@
 package com.test.ioc;
 
-import com.test.strategy.Employee;
-import com.test.strategy.EmployeeType;
-import com.test.strategy.Hour;
-import com.test.strategy.Sale;
+
+import com.test.strategy.*;
 import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import java.lang.reflect.Constructor;
+
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ public class ClassPathXmlBeanContext {
     }
 
     public  Map<Employee,Integer> getEmployees() throws Exception{
-        HashMap<Employee,Integer> employeesMap = new HashMap<>();
+        HashMap<Employee,Integer> employeesMap = new HashMap<Employee,Integer>();
         SAXReader reader = new SAXReader();
         Document document = reader.read(this.getClass().getClassLoader().getResource(xmlPath));
         Element rootElement = document.getRootElement();
@@ -49,26 +49,28 @@ public class ClassPathXmlBeanContext {
                 String birStr =employElement.attributeValue("birthday");
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date birthday = sdf.parse(birStr);
-                //利用反射创建实例
-                Class<?> clazz = Class.forName(EmployeeType.valueOf(type). getValue());
-                Constructor<?> constructor = clazz.getConstructor(String.class, Date.class);
-                Employee employee =(Employee) constructor.newInstance(name, birthday);
-                double workingHour = 0.00;
-                if(type.equals("hour")){
-                    Hour hour = (Hour) employee;
-                    double workingHours = Double.parseDouble(employElement.attributeValue("workingHours"));
-                    hour.setWorkingHours(workingHours);
-                    employeesMap.put(hour,month);
-                    continue;
-                }else if(type.equals("sale")){
-                    Sale sale = (Sale) employee;
-                    double amount = Double.parseDouble(employElement.attributeValue("amount"));
-                    sale.setAmount(amount);
-                    employeesMap.put(sale,month);
-                    continue;
-                }else if(type.equals("salary")){
-                    employeesMap.put(employee,month);
+                //从工厂获取实例
+                EmployeeType employeeType = EmployeeType.valueOf(type);
+                Employee employee = EmployeeFactory.getEmployee(employeeType);
+                employee.name = name;
+                employee.birthday = birthday;
+                Class<?> clazz = Class.forName(employeeType.getValue());
+                Field[] fields = clazz.getDeclaredFields();
+                //为私有属性赋值
+                List<Attribute> attributes = employElement.attributes();
+                for (Attribute attribute : attributes) {
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                        int modifiers = field.getModifiers();
+                        if(field.getName().equals(attribute.getName())&&modifiers==2){
+                            field.set(employee,Double.parseDouble(attribute.getValue()));
+                            continue;
+                        }
+
+                    }
                 }
+                employeesMap.put(employee,month);
+
 
             }
 
